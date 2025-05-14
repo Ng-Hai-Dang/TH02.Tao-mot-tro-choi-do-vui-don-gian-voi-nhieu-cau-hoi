@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trò Chơi Đố Vui</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .quiz-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 500px;
+            text-align: center;
+        }
+        .question {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .option {
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .option:hover {
+            background-color: #0056b3;
+        }
+        .feedback {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .score {
+            margin-top: 20px;
+            font-size: 1.1em;
+        }
+        .next-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .next-btn:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="question" id="question"></div>
+        <div class="options" id="options"></div>
+        <div class="feedback" id="feedback"></div>
+        <div class="score" id="score">Điểm: 0</div>
+        <button class="next-btn" id="nextBtn" style="display: none;">Câu tiếp theo</button>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                question: "Đồ vật nào được dùng để làm phẳng quần áo?",
+                options: ["A. Bàn đạp", "B. Bàn tính", "C. Bàn là", "D. Bàn bạc"],
+                correct: "C. Bàn là",
+                hint: "Gợi ý: BL"
+            },
+            {
+                question: "Từ nào dưới đây không phải là từ tượng thanh?",
+                options: ["A. Leng keng", "B. Xào xạc", "C. Lộp bộp", "D. Bồng bềnh"],
+                correct: "D. Bồng bềnh",
+                hint: "Gợi ý: BB"
+            },
+            {
+                question: "Loại áo chống rét cho bộ đội Việt Nam trong thời kì kháng chiến được gọi là gì?",
+                options: ["A. Trấn giữ", "B. Trấn thủ", "C. Trấn phái", "D. Trấn biên"],
+                correct: "A. Trấn giữ",
+                hint: "Gợi ý: TG"
+            },
+            {
+                question: "Đồng Bạt (THB) là đơn vị tiền tệ của nước nào?",
+                options: ["A. Lào", "B. Campuchia", "C. Thái Lan", "D. Ấn Độ"],
+                correct: "C. Thái Lan",
+                hint: "Gợi ý: TL"
+            },
+            {
+                question: "Câu thơ: “Mà nay áo vải cờ đào/Giúp dân xây dựng bao công trình” là của ai?",
+                options: ["A. Lê Ngọc Hân", "B. Nguyễn Nhạc", "C. Nguyễn Lữ", "D. Nguyễn Trung Trực"],
+                correct: "A. Lê Ngọc Hân",
+                hint: "Gợi ý: LNH"
+            },
+            {
+                question: "Bài thơ “Nắng mới” của Lưu Trọng Lư viết về ai?",
+                options: ["A. Mẹ", "B. Vợ", "C. Bà", "D. Em gái"],
+                correct: "A. Mẹ",
+                hint: "Gợi ý: M"
+            },
+            {
+                question: "Thủy điện Thác Bà được xây trên con sông nào?",
+                options: ["A. Sông Cầu", "B. Sông Thương", "C. Sông Chảy", "D. Sông Lục Nam"],
+                correct: "C. Sông Chảy",
+                hint: "Gợi ý: SC"
+            },
+            {
+                question: "Liệt sỹ Đặng Thùy Trâm đã chiến đấu và hy sinh ở đâu?",
+                options: ["A. Đức Phổ", "B. Bến Thuỷ", "C. Củ Chi", "D. Đồng Hới"],
+                correct: "A. Đức Phổ",
+                hint: "Gợi ý: ĐP"
+            },
+            {
+                question: "Ai là cầu thủ duy nhất lập được īg2 Hat trick trong 1 kỳ Euro?",
+                options: ["A. Marco van Basten", "B. Dieter Mueller", "C. Patrick Kluivert", "D. Michael Platini"],
+                correct: "D. Michael Platini",
+                hint: "Gợi ý: MP"
+            },
+            {
+                question: "Tuyển tập thơ “Bạch Vân quốc ngữ thi tập” là của ai?",
+                options: ["A. Nguyễn Trãi", "B. Lê Thánh Tông", "C. Nguyễn Hiền", "D. Nguyễn Bỉnh Khiêm"],
+                correct: "D. Nguyễn Bỉnh Khiêm",
+                hint: "Gợi ý: NBK"
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let firstAttempt = true;
+
+        const questionEl = document.getElementById('question');
+        const optionsEl = document.getElementById('options');
+        const feedbackEl = document.getElementById('feedback');
+        const scoreEl = document.getElementById('score');
+        const nextBtn = document.getElementById('nextBtn');
+
+        function loadQuestion() {
+            const q = quizData[currentQuestion];
+            questionEl.textContent = `${currentQuestion + 1}. ${q.question}`;
+            optionsEl.innerHTML = '';
+            q.options.forEach(option => {
+                const button = document.createElement('button');
+                button.classList.add('option');
+                button.textContent = option;
+                button.addEventListener('click', () => checkAnswer(option));
+                optionsEl.appendChild(button);
+            });
+            feedbackEl.textContent = '';
+            nextBtn.style.display = 'none';
+            firstAttempt = true;
+        }
+
+        function checkAnswer(selected) {
+            const q = quizData[currentQuestion];
+            if (selected === q.correct) {
+                feedbackEl.textContent = 'Đúng rồi! Chúc mừng bạn!';
+                feedbackEl.style.color = 'green';
+                if (firstAttempt) {
+                    score += 10;
+                    scoreEl.textContent = `Điểm: ${score}`;
+                }
+                nextBtn.style.display = 'block';
+            } else {
+                feedbackEl.textContent = `Sai rồi! ${q.hint}`;
+                feedbackEl.style.color = 'red';
+                firstAttempt = false;
+            }
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < quizData.length) {
+                loadQuestion();
+            } else {
+                questionEl.textContent = 'Chúc mừng bạn đã hoàn thành trò chơi!';
+                optionsEl.innerHTML = '';
+                feedbackEl.textContent = `Điểm cuối cùng của bạn: ${score}/${quizData.length * 10}`;
+                nextBtn.style.display = 'none';
+            }
+        }
+
+        nextBtn.addEventListener('click', nextQuestion);
+
+        loadQuestion();
+    </script>
+</body>
+</html>
